@@ -52,11 +52,16 @@ public class User
             public void onResponse(@NonNull Call<SteamEntities.VanityUrlResponse> call, @NonNull Response<SteamEntities.VanityUrlResponse> response)
             {
                 final SteamEntities.VanityUrlResponse body = response.body();
-                if(body != null && body.data != null && body.data.getSuccessCode() == 1)
-                {
-                    Log.d(TAG, body.toString());
-                    listener.onUserResolved(new User(username, body.data.getSteamId64()));
-                }
+                if(body != null && body.data != null)
+                    if(body.data.getSuccessCode() == 1)
+                    {
+                        listener.onUserResolved(new User(username, body.data.getSteamId64()));
+                    }
+                    else
+                    {
+                        Log.d(TAG, body.data.getErrorMessage());
+                        listener.onUserResolved(null);
+                    }
                 else
                 {
                     listener.onUserResolved(null);
@@ -96,7 +101,7 @@ public class User
                     break;
                 }
                 default:
-                    throw new IllegalStateException("Steam url type is "+type);
+                    throw new IllegalStateException("Steam url type is " + type);
             }
         }
         else
@@ -123,6 +128,30 @@ public class User
         }
     }
 
+    public void checkInventory(OnInventoryCheckFinished listener)
+    {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://steamcommunity.com")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        SteamCalls steamCalls = retrofit.create(SteamCalls.class);
+        Call<SteamEntities.Inventory> inventoryCall = steamCalls.getInventory(this.steamId64, 1);
+        inventoryCall.enqueue(new Callback<SteamEntities.Inventory>()
+        {
+            @Override
+            public void onResponse(@NonNull Call<SteamEntities.Inventory> call, @NonNull Response<SteamEntities.Inventory> response)
+            {
+                listener.onInventoryCheckFinished(response.body() != null);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<SteamEntities.Inventory> call, @NonNull Throwable t)
+            {
+                listener.onInventoryCheckFinished(false);
+            }
+        });
+    }
+
     @Override
     public String toString()
     {
@@ -135,5 +164,10 @@ public class User
     public interface OnUserResolvedListener
     {
         void onUserResolved(User user);
+    }
+
+    public interface OnInventoryCheckFinished
+    {
+        void onInventoryCheckFinished(boolean accessible);
     }
 }

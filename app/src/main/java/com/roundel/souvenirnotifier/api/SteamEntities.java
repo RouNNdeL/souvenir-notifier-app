@@ -7,14 +7,20 @@ import com.google.gson.annotations.SerializedName;
 
 public class SteamEntities
 {
-    public class VanityUrlResponse
+    public static class Inventory
+    {
+        @SerializedName("total_inventory_count")
+        int totalCount;
+    }
+
+    public static class VanityUrlResponse
     {
         @SerializedName("response")
         public SteamEntities.VanityUrl data;
     }
 
     @SuppressWarnings("WeakerAccess")
-    public class VanityUrl
+    public static class VanityUrl
     {
         @SerializedName("steamid")
         private long steamId64;

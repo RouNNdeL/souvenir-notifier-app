@@ -28,8 +28,9 @@ public class MainActivity extends AppCompatActivity
         String token = FirebaseInstanceId.getInstance().getToken();
         mTokenTextView.setText(token);
 
-        User.autoDetect("roundel", "http://steamcommunity.com/id/RouNdeL", (user) -> {
+        User.autoDetect("roundel", "roundel", (user) -> {
             Log.d(TAG, user.toString());
+            user.checkInventory(accessible -> Log.d(TAG, String.valueOf(accessible)));
         });
     }
 }
