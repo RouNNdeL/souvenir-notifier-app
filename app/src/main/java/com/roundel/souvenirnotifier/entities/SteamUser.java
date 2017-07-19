@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.google.firebase.database.Exclude;
 import com.google.gson.GsonBuilder;
 import com.roundel.souvenirnotifier.api.ApiTokens;
 import com.roundel.souvenirnotifier.api.SteamCalls;
@@ -22,9 +23,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class User
+public class SteamUser
 {
-    private static final String TAG = User.class.getSimpleName();
+    private static final String TAG = SteamUser.class.getSimpleName();
 
     private static final Pattern REGEX_URL = Pattern.compile("^(https?://)?(www.)?steamcommunity\\.com/(id|profiles)/([^/]*)");
     private static final Pattern REGEX_ID64 = Pattern.compile("^[0-9]{17}$");
@@ -38,13 +39,17 @@ public class User
     private Uri avatar64;
     private Uri avatarFull;
 
-    private User(SteamEntities.PlayerSummary summary)
+    private SteamUser(SteamEntities.PlayerSummary summary)
     {
         this.steamId64 = summary.steamId64;
         this.username = summary.username;
         this.avatar32 = summary.avatar;
         this.avatar64 = summary.avatarMedium;
         this.avatarFull = summary.avatarFull;
+    }
+
+    public SteamUser()
+    {
     }
 
     private static void fromVanityName(String vanityName, final OnUserResolvedListener listener)
@@ -102,12 +107,12 @@ public class User
             {
                 case TYPE_STEAM_ID64:
                 {
-                    User.fromSteamId64(Long.parseLong(id), listener);
+                    SteamUser.fromSteamId64(Long.parseLong(id), listener);
                     break;
                 }
                 case TYPE_VANITY_NAME:
                 {
-                    User.fromVanityName(id, listener);
+                    SteamUser.fromVanityName(id, listener);
                     break;
                 }
                 default:
@@ -128,7 +133,7 @@ public class User
         {
             if(summary != null)
             {
-                listener.onUserResolved(new User(summary));
+                listener.onUserResolved(new SteamUser(summary));
             }
             else
             {
@@ -137,21 +142,21 @@ public class User
         });
     }
 
-    public static void autoDetect(String username, String input, OnUserResolvedListener listener)
+    public static void autoDetect(String input, OnUserResolvedListener listener)
     {
         Matcher urlMatcher = REGEX_URL.matcher(input);
         Matcher id64Matcher = REGEX_ID64.matcher(input);
         if(urlMatcher.matches())
         {
-            User.fromUrl(input, listener);
+            SteamUser.fromUrl(input, listener);
         }
         else if(id64Matcher.matches())
         {
-            User.fromSteamId64(Long.parseLong(input), listener);
+            SteamUser.fromSteamId64(Long.parseLong(input), listener);
         }
         else
         {
-            User.fromVanityName(input, listener);
+            SteamUser.fromVanityName(input, listener);
         }
     }
 
@@ -193,9 +198,12 @@ public class User
     @Override
     public String toString()
     {
-        return "User{" +
-                "username='" + username + '\'' +
-                ", steamId64=" + steamId64 +
+        return "SteamUser{" +
+                "steamId64=" + steamId64 +
+                ", username='" + username + '\'' +
+                ", avatar32=" + avatar32 +
+                ", avatar64=" + avatar64 +
+                ", avatarFull=" + avatarFull +
                 '}';
     }
 
@@ -226,7 +234,7 @@ public class User
 
     public interface OnUserResolvedListener
     {
-        void onUserResolved(User user);
+        void onUserResolved(SteamUser steamUser);
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -238,5 +246,25 @@ public class User
     interface OnSummaryLoadedListener
     {
         void onSummaryLoaded(SteamEntities.PlayerSummary summary);
+    }
+
+    public long getSteamId64()
+    {
+        return steamId64;
+    }
+
+    public void setSteamId64(long steamId64)
+    {
+        this.steamId64 = steamId64;
+    }
+
+    public String getUsername()
+    {
+        return username;
+    }
+
+    public void setUsername(String username)
+    {
+        this.username = username;
     }
 }
