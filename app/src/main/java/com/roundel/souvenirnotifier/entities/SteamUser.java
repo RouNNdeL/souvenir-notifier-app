@@ -3,11 +3,11 @@ package com.roundel.souvenirnotifier.entities;
  * Created by Krzysiek on 19/07/2017.
  */
 
+import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.firebase.database.Exclude;
 import com.google.gson.GsonBuilder;
 import com.roundel.souvenirnotifier.api.ApiTokens;
 import com.roundel.souvenirnotifier.api.SteamCalls;
@@ -35,17 +35,11 @@ public class SteamUser
 
     private long steamId64;
     private String username;
-    private Uri avatar32;
-    private Uri avatar64;
-    private Uri avatarFull;
 
     private SteamUser(SteamEntities.PlayerSummary summary)
     {
         this.steamId64 = summary.steamId64;
         this.username = summary.username;
-        this.avatar32 = summary.avatar;
-        this.avatar64 = summary.avatarMedium;
-        this.avatarFull = summary.avatarFull;
     }
 
     public SteamUser()
@@ -91,7 +85,7 @@ public class SteamUser
         });
     }
 
-    private static void fromSteamId64(long steamId64, OnUserResolvedListener listener)
+    public static void fromSteamId64(long steamId64, OnUserResolvedListener listener)
     {
         withSummary(steamId64, listener);
     }
@@ -201,10 +195,25 @@ public class SteamUser
         return "SteamUser{" +
                 "steamId64=" + steamId64 +
                 ", username='" + username + '\'' +
-                ", avatar32=" + avatar32 +
-                ", avatar64=" + avatar64 +
-                ", avatarFull=" + avatarFull +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+
+        SteamUser steamUser = (SteamUser) o;
+
+        return steamId64 == steamUser.steamId64;
+
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return (int) (steamId64 ^ (steamId64 >>> 32));
     }
 
     public void checkInventory(OnInventoryCheckFinished listener)
@@ -232,22 +241,6 @@ public class SteamUser
         });
     }
 
-    public interface OnUserResolvedListener
-    {
-        void onUserResolved(SteamUser steamUser);
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public interface OnInventoryCheckFinished
-    {
-        void onInventoryCheckFinished(boolean accessible);
-    }
-
-    interface OnSummaryLoadedListener
-    {
-        void onSummaryLoaded(SteamEntities.PlayerSummary summary);
-    }
-
     public long getSteamId64()
     {
         return steamId64;
@@ -266,5 +259,21 @@ public class SteamUser
     public void setUsername(String username)
     {
         this.username = username;
+    }
+
+    public interface OnUserResolvedListener
+    {
+        void onUserResolved(SteamUser steamUser);
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public interface OnInventoryCheckFinished
+    {
+        void onInventoryCheckFinished(boolean accessible);
+    }
+
+    interface OnSummaryLoadedListener
+    {
+        void onSummaryLoaded(SteamEntities.PlayerSummary summary);
     }
 }
