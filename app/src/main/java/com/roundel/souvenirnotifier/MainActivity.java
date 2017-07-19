@@ -15,8 +15,6 @@ public class MainActivity extends AppCompatActivity
 {
      private static final String TAG = MainActivity.class.getSimpleName();
 
-    @BindView(R.id.token_text_view) TextView mTokenTextView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -26,11 +24,10 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         String token = FirebaseInstanceId.getInstance().getToken();
-        mTokenTextView.setText(token);
 
         User.autoDetect("roundel", "roundel", (user) -> {
             Log.d(TAG, user.toString());
-            user.checkInventory(accessible -> Log.d(TAG, String.valueOf(accessible)));
+            user.loadSummary(summary -> Log.d(TAG, summary.username));
         });
     }
 }

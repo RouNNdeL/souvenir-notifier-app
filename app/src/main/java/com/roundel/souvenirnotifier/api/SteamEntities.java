@@ -3,14 +3,59 @@ package com.roundel.souvenirnotifier.api;
  * Created by Krzysiek on 19/07/2017.
  */
 
+import android.net.Uri;
+
 import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 public class SteamEntities
 {
+    public static class PlayerSummariesResponse
+    {
+        @SerializedName("response")
+        private PlayersSummaries playerSummaries;
+
+        public PlayerSummariesResponse(PlayersSummaries playerSummaries)
+        {
+            this.playerSummaries = playerSummaries;
+        }
+
+        public List<PlayerSummary> getPlayerSummaries()
+        {
+            return playerSummaries.playerSummaries;
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class PlayersSummaries
+    {
+        @SerializedName("players")
+        private List<PlayerSummary> playerSummaries;
+    }
+
+    public static class PlayerSummary
+    {
+        @SerializedName("personaname")
+        public String username;
+
+        @SerializedName("avatar")
+        public Uri avatar;
+
+        @SerializedName("avatarmedium")
+        public Uri avatarMedium;
+
+        @SerializedName("avatarfull")
+        public Uri avatarFull;
+
+        @SerializedName("loccountrycode")
+        public String countryCode;
+    }
+
     public static class Inventory
     {
         @SerializedName("total_inventory_count")
-        int totalCount;
+        public int totalCount;
     }
 
     public static class VanityUrlResponse
