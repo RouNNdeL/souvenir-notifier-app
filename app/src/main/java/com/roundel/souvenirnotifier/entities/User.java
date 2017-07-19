@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.roundel.souvenirnotifier.api.ApiTokens;
 import com.roundel.souvenirnotifier.api.SteamCalls;
@@ -33,16 +32,22 @@ public class User
     private static final String TYPE_STEAM_ID64 = "profiles";
     private static final String TYPE_VANITY_NAME = "id";
 
-    private String username;
     private long steamId64;
+    private String username;
+    private Uri avatar32;
+    private Uri avatar64;
+    private Uri avatarFull;
 
-    private User(String username, long steamId64)
+    private User(SteamEntities.PlayerSummary summary)
     {
-        this.username = username;
-        this.steamId64 = steamId64;
+        this.steamId64 = summary.steamId64;
+        this.username = summary.username;
+        this.avatar32 = summary.avatar;
+        this.avatar64 = summary.avatarMedium;
+        this.avatarFull = summary.avatarFull;
     }
 
-    private static void fromVanityName(final String username, String vanityName, final OnUserResolvedListener listener)
+    private static void fromVanityName(String vanityName, final OnUserResolvedListener listener)
     {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(SteamCalls.API_URL)
@@ -60,7 +65,7 @@ public class User
                 if(body != null && body.data != null)
                     if(body.data.getSuccessCode() == 1)
                     {
-                        listener.onUserResolved(new User(username, body.data.getSteamId64()));
+                        withSummary(body.data.getSteamId64(), listener);
                     }
                     else
                     {
@@ -81,12 +86,12 @@ public class User
         });
     }
 
-    private static void fromSteamId64(String username, long steamId64, OnUserResolvedListener listener)
+    private static void fromSteamId64(long steamId64, OnUserResolvedListener listener)
     {
-        listener.onUserResolved(new User(username, steamId64));
+        withSummary(steamId64, listener);
     }
 
-    private static void fromUrl(String username, String url, OnUserResolvedListener listener)
+    private static void fromUrl(String url, OnUserResolvedListener listener)
     {
         Matcher matcher = REGEX_URL.matcher(url);
         if(matcher.matches())
@@ -97,16 +102,18 @@ public class User
             {
                 case TYPE_STEAM_ID64:
                 {
-                    User.fromSteamId64(username, Long.parseLong(id), listener);
+                    User.fromSteamId64(Long.parseLong(id), listener);
                     break;
                 }
                 case TYPE_VANITY_NAME:
                 {
-                    User.fromVanityName(username, id, listener);
+                    User.fromVanityName(id, listener);
                     break;
                 }
                 default:
-                    throw new IllegalStateException("Steam url type is " + type);
+                {
+                    listener.onUserResolved(null);
+                }
             }
         }
         else
@@ -115,22 +122,72 @@ public class User
         }
     }
 
+    private static void withSummary(long steamId64, OnUserResolvedListener listener)
+    {
+        loadSummary(steamId64, summary ->
+        {
+            if(summary != null)
+            {
+                listener.onUserResolved(new User(summary));
+            }
+            else
+            {
+                listener.onUserResolved(null);
+            }
+        });
+    }
+
     public static void autoDetect(String username, String input, OnUserResolvedListener listener)
     {
         Matcher urlMatcher = REGEX_URL.matcher(input);
         Matcher id64Matcher = REGEX_ID64.matcher(input);
         if(urlMatcher.matches())
         {
-            User.fromUrl(username, input, listener);
+            User.fromUrl(input, listener);
         }
         else if(id64Matcher.matches())
         {
-            User.fromSteamId64(username, Long.parseLong(input), listener);
+            User.fromSteamId64(Long.parseLong(input), listener);
         }
         else
         {
-            User.fromVanityName(username, input, listener);
+            User.fromVanityName(input, listener);
         }
+    }
+
+    private static void loadSummary(long steamId64, OnSummaryLoadedListener listener)
+    {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(Uri.class, new GsonUriAdapter());
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(SteamCalls.API_URL)
+                .addConverterFactory(GsonConverterFactory.create(builder.create()))
+                .build();
+        SteamCalls steamCalls = retrofit.create(SteamCalls.class);
+        Call<SteamEntities.PlayerSummariesResponse>
+                summariesResponseCall = steamCalls.getSummary(ApiTokens.STEAM, steamId64);
+        summariesResponseCall.enqueue(new Callback<SteamEntities.PlayerSummariesResponse>()
+        {
+            @Override
+            public void onResponse(@NonNull Call<SteamEntities.PlayerSummariesResponse> call,
+                                   @NonNull Response<SteamEntities.PlayerSummariesResponse> response)
+            {
+                final SteamEntities.PlayerSummariesResponse summaries = response.body();
+                if(summaries != null && summaries.getPlayerSummaries() != null &&
+                        summaries.getPlayerSummaries().size() == 1)
+                {
+                    listener.onSummaryLoaded(summaries.getPlayerSummaries().get(0));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<SteamEntities.PlayerSummariesResponse> call, @NonNull Throwable t)
+            {
+                t.printStackTrace();
+                listener.onSummaryLoaded(null);
+            }
+        });
     }
 
     @Override
@@ -167,41 +224,6 @@ public class User
         });
     }
 
-    public void loadSummary(OnSummaryLoadedListener listener)
-    {
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(Uri.class, new GsonUriAdapter());
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(SteamCalls.API_URL)
-                .addConverterFactory(GsonConverterFactory.create( builder.create()))
-                .build();
-        SteamCalls steamCalls = retrofit.create(SteamCalls.class);
-        Call<SteamEntities.PlayerSummariesResponse>
-                summariesResponseCall = steamCalls.getSummary(ApiTokens.STEAM, this.steamId64);
-        summariesResponseCall.enqueue(new Callback<SteamEntities.PlayerSummariesResponse>()
-        {
-            @Override
-            public void onResponse(@NonNull Call<SteamEntities.PlayerSummariesResponse> call,
-                                   @NonNull Response<SteamEntities.PlayerSummariesResponse> response)
-            {
-                final SteamEntities.PlayerSummariesResponse summaries = response.body();
-                if(summaries != null && summaries.getPlayerSummaries() != null &&
-                        summaries.getPlayerSummaries().size() == 1)
-                {
-                    listener.onSummaryLoaded(summaries.getPlayerSummaries().get(0));
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<SteamEntities.PlayerSummariesResponse> call, @NonNull Throwable t)
-            {
-                t.printStackTrace();
-                listener.onSummaryLoaded(null);
-            }
-        });
-    }
-
     public interface OnUserResolvedListener
     {
         void onUserResolved(User user);
@@ -213,7 +235,7 @@ public class User
         void onInventoryCheckFinished(boolean accessible);
     }
 
-    public interface OnSummaryLoadedListener
+    interface OnSummaryLoadedListener
     {
         void onSummaryLoaded(SteamEntities.PlayerSummary summary);
     }

@@ -36,6 +36,9 @@ public class SteamEntities
 
     public static class PlayerSummary
     {
+        @SerializedName("steamid")
+        public long steamId64;
+
         @SerializedName("personaname")
         public String username;
 
