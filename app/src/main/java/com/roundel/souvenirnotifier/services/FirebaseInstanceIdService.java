@@ -1,4 +1,4 @@
-package com.roundel.souvenirnotifier;
+package com.roundel.souvenirnotifier.services;
 /*
  * Created by Krzysiek on 17/07/2017.
  */
@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.roundel.souvenirnotifier.MainActivity;
+import com.roundel.souvenirnotifier.R;
 
 public class FirebaseInstanceIdService extends com.google.firebase.iid.FirebaseInstanceIdService
 {

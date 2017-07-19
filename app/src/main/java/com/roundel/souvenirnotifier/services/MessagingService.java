@@ -1,4 +1,4 @@
-package com.roundel.souvenirnotifier;
+package com.roundel.souvenirnotifier.services;
 /*
  * Created by Krzysiek on 17/07/2017.
  */
@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.roundel.souvenirnotifier.R;
 
 import java.util.Locale;
 import java.util.Map;
