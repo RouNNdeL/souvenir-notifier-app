@@ -23,6 +23,8 @@ public class SteamUsersAdapter extends RecyclerView.Adapter<SteamUsersAdapter.Vi
 {
     private List<SteamUser> mUsers;
     private Context mContext;
+    private OnItemLongClickListener mOnItemLongClickListener;
+    private RecyclerView mRecyclerView;
 
     public SteamUsersAdapter(Context context, List<SteamUser> users)
     {
@@ -36,11 +38,29 @@ public class SteamUsersAdapter extends RecyclerView.Adapter<SteamUsersAdapter.Vi
         notifyDataSetChanged();
     }
 
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener)
+    {
+        mOnItemLongClickListener = onItemLongClickListener;
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         ConstraintLayout content = (ConstraintLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_user, parent, false);
+
+        content.setOnLongClickListener(v -> {
+            if(mOnItemLongClickListener != null)
+            {
+                mOnItemLongClickListener.onItemLongClick(mRecyclerView.getChildLayoutPosition(v));
+            }
+            return true;
+        });
+
+        final ViewGroup.LayoutParams lp = content.getLayoutParams();
+        lp.width = parent.getWidth();
+        //lp.height = parent.getHeight();
+        content.setLayoutParams(lp);
 
         return new ViewHolder(content);
     }
@@ -63,6 +83,20 @@ public class SteamUsersAdapter extends RecyclerView.Adapter<SteamUsersAdapter.Vi
         return mUsers.size();
     }
 
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView)
+    {
+        super.onAttachedToRecyclerView(recyclerView);
+        this.mRecyclerView = recyclerView;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView)
+    {
+        super.onDetachedFromRecyclerView(recyclerView);
+        this.mRecyclerView = null;
+    }
+
     class ViewHolder extends RecyclerView.ViewHolder
     {
 
@@ -70,5 +104,10 @@ public class SteamUsersAdapter extends RecyclerView.Adapter<SteamUsersAdapter.Vi
         {
             super(itemView);
         }
+    }
+
+    public interface OnItemLongClickListener
+    {
+        void onItemLongClick(int position);
     }
 }

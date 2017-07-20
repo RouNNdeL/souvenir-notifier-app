@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -30,7 +31,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements AddSteamUserDialogFragment.OnUserAddedListener
+public class MainActivity extends AppCompatActivity implements AddSteamUserDialogFragment.OnUserAddedListener, SteamUsersAdapter.OnItemLongClickListener
 {
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -62,8 +63,11 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
 
         mLayoutManager = new LinearLayoutManager(this);
         mAdapter = new SteamUsersAdapter(this, mSteamUsers);
+        mAdapter.setOnItemLongClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(mLayoutManager);
+
 
         mFab.setOnClickListener(v -> showAddUserDialog());
     }
@@ -198,5 +202,21 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
     {
         Log.d(TAG, "Updating UI");
         mAdapter.swapData(mSteamUsers);
+    }
+
+    @Override
+    public void onItemLongClick(int position)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to remove this account from your list?")
+                .setTitle("Remove account")
+                .setPositiveButton("Remove", (dialog, which) -> {
+                    dialog.dismiss();
+                    mSteamUsers.remove(position);
+                    saveData();
+                    updateUi();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        builder.create().show();
     }
 }
