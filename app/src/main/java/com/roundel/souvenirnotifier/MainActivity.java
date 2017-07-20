@@ -105,6 +105,23 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
         return true;
     }
 
+    @Override
+    public void onItemLongClick(int position)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to remove this account from your list?")
+               .setTitle("Remove account")
+               .setPositiveButton("Remove", (dialog, which) ->
+               {
+                   dialog.dismiss();
+                   mSteamUsers.remove(position);
+                   saveData();
+                   updateUi();
+               })
+               .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        builder.create().show();
+    }
+
     private void signIn()
     {
         mAuth.signInAnonymously().addOnCompleteListener(this, task ->
@@ -136,8 +153,6 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
         // Create and show the dialog.
         DialogFragment newFragment = AddSteamUserDialogFragment.newInstance();
         newFragment.show(ft, "dialog");
-
-
     }
 
     private void addUser(SteamUser steamUser, boolean notify)
@@ -202,21 +217,5 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
     {
         Log.d(TAG, "Updating UI");
         mAdapter.swapData(mSteamUsers);
-    }
-
-    @Override
-    public void onItemLongClick(int position)
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Are you sure you want to remove this account from your list?")
-                .setTitle("Remove account")
-                .setPositiveButton("Remove", (dialog, which) -> {
-                    dialog.dismiss();
-                    mSteamUsers.remove(position);
-                    saveData();
-                    updateUi();
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-        builder.create().show();
     }
 }
