@@ -3,6 +3,10 @@ package com.roundel.souvenirnotifier;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,16 +23,14 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.roundel.souvenirnotifier.adapters.SteamUsersAdapter;
 import com.roundel.souvenirnotifier.entities.SteamUser;
-import com.roundel.souvenirnotifier.entities.UserData;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements AddSteamUserDialogFragment.OnUserAddedListener
 {
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -62,6 +64,8 @@ public class MainActivity extends AppCompatActivity
         mAdapter = new SteamUsersAdapter(this, mSteamUsers);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+        mFab.setOnClickListener(v -> showAddUserDialog());
     }
 
     @Override
@@ -76,8 +80,25 @@ public class MainActivity extends AppCompatActivity
         }
         else
         {
-            registerOnDataChangeListener();
+            fetchDataFromDb();
         }
+    }
+
+    @Override
+    public boolean onUserAdded(SteamUser user, boolean inventoryAccessible)
+    {
+        addUser(user, true);
+        if(!inventoryAccessible)
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setPositiveButton("Ok", (dialog, which) -> dialog.dismiss())
+                   .setTitle("Inventory error")
+                   .setMessage("We were unable to retrieve contents of you inventory. It's probably set to private, " +
+                           "change it's visibility to public or you might not receive the notifications for this account.");
+            builder.create().show();
+        }
+
+        return true;
     }
 
     private void signIn()
@@ -87,7 +108,7 @@ public class MainActivity extends AppCompatActivity
             if(task.isSuccessful())
             {
                 Log.d(TAG, "signInAnonymously:success");
-                registerOnDataChangeListener();
+                fetchDataFromDb();
             }
             else
             {
@@ -99,6 +120,20 @@ public class MainActivity extends AppCompatActivity
     private void showAddUserDialog()
     {
         //TODO: Show a custom dialog that will try to add a new Steam Account
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        Fragment prev = getSupportFragmentManager().findFragmentByTag("dialog");
+        if(prev != null)
+        {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+
+        // Create and show the dialog.
+        DialogFragment newFragment = AddSteamUserDialogFragment.newInstance();
+        newFragment.show(ft, "dialog");
+
+
     }
 
     private void addUser(SteamUser steamUser, boolean notify)
@@ -121,7 +156,8 @@ public class MainActivity extends AppCompatActivity
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference usersReference = db.getReference(DATABASE_USERS).child(mAuth.getCurrentUser().getUid());
         usersReference.child(DATABASE_TOKEN).setValue(mToken);
-        usersReference.child(DATABASE_STEAM_ACCOUNTS).removeValue((err, ref) -> {
+        usersReference.child(DATABASE_STEAM_ACCOUNTS).removeValue((err, ref) ->
+        {
             for(SteamUser account : mSteamUsers)
             {
                 ref.child(String.valueOf(account.getSteamId64())).setValue(account.getUsername());
@@ -131,7 +167,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @SuppressWarnings("ConstantConditions")
-    private void registerOnDataChangeListener()
+    private void fetchDataFromDb()
     {
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference ref = db.getReference(DATABASE_USERS).child(mAuth.getCurrentUser().getUid());
