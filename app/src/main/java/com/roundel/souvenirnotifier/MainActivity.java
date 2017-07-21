@@ -58,8 +58,10 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
         ButterKnife.bind(this);
 
         mAuth = FirebaseAuth.getInstance();
-
         mToken = FirebaseInstanceId.getInstance().getToken();
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        database.setPersistenceEnabled(true);
+        database.getReference(DATABASE_USERS).keepSynced(true);
 
         mLayoutManager = new LinearLayoutManager(this);
         mAdapter = new SteamUsersAdapter(this, mSteamUsers);
