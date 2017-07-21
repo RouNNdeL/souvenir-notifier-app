@@ -42,8 +42,10 @@ public class SteamUser
         this.username = summary.username;
     }
 
-    public SteamUser()
+    public SteamUser(long steamId64, String username)
     {
+        this.steamId64 = steamId64;
+        this.username = username;
     }
 
     private static void fromVanityName(String vanityName, final OnUserResolvedListener listener)
