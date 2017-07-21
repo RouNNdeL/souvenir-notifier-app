@@ -114,8 +114,8 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
                .setPositiveButton("Remove", (dialog, which) ->
                {
                    dialog.dismiss();
+                   removeAccountFromDb(mSteamUsers.get(position).getSteamId64());
                    mSteamUsers.remove(position);
-                   saveData();
                    updateUi();
                })
                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
@@ -175,14 +175,17 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference usersReference = db.getReference(DATABASE_USERS).child(mAuth.getCurrentUser().getUid());
         usersReference.child(DATABASE_TOKEN).setValue(mToken);
-        usersReference.child(DATABASE_STEAM_ACCOUNTS).removeValue((err, ref) ->
+        for(SteamUser account : mSteamUsers)
         {
-            for(SteamUser account : mSteamUsers)
-            {
-                ref.child(String.valueOf(account.getSteamId64())).setValue(account.getUsername());
-            }
-        });
+            usersReference.child(DATABASE_STEAM_ACCOUNTS).child(String.valueOf(account.getSteamId64())).setValue(account.getUsername());
+        }
+    }
 
+    private void removeAccountFromDb(long steam64Id)
+    {
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference usersReference = db.getReference(DATABASE_USERS).child(mAuth.getCurrentUser().getUid());
+        usersReference.child(DATABASE_STEAM_ACCOUNTS).child(String.valueOf(steam64Id)).removeValue();
     }
 
     @SuppressWarnings("ConstantConditions")
