@@ -35,9 +35,9 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
 {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final String DATABASE_USERS = "users";
-    private static final String DATABASE_TOKEN = "token";
-    private static final String DATABASE_STEAM_ACCOUNTS = "steamAccounts";
+    public static final String DATABASE_USERS = "users";
+    public static final String DATABASE_TOKEN = "token";
+    public static final String DATABASE_STEAM_ACCOUNTS = "steamAccounts";
 
     @BindView(R.id.floatingActionButton) FloatingActionButton mFab;
     @BindView(R.id.recycler_view) RecyclerView mRecyclerView;
@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(mLayoutManager);
-
 
         mFab.setOnClickListener(v -> showAddUserDialog());
     }

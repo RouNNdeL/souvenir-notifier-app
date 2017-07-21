@@ -9,40 +9,42 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.util.Log;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.roundel.souvenirnotifier.MainActivity;
 import com.roundel.souvenirnotifier.R;
 
+
+import static com.roundel.souvenirnotifier.MainActivity.DATABASE_TOKEN;
+import static com.roundel.souvenirnotifier.MainActivity.DATABASE_USERS;
+
 public class FirebaseInstanceIdService extends com.google.firebase.iid.FirebaseInstanceIdService
 {
     private static final String TAG = FirebaseInstanceIdService.class.getSimpleName();
-    private static final int NOTIFICATION_ID = 100;
 
     @Override
     public void onTokenRefresh()
     {
-        // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
 
-        notifyAboutNewToken();
+        refreshTokenInDb(refreshedToken);
     }
 
-    private void notifyAboutNewToken()
+    private void refreshTokenInDb(String token)
     {
-        Intent openAppIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, 0);
 
-        Notification.Builder builder = new Notification.Builder(this);
-        builder.setColor(getColor(R.color.colorPrimary))
-                .setContentTitle("New Firebase token")
-                .setContentText("A new token has been generated, make sure to update it in the config.cfg")
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setSmallIcon(R.drawable.ic_ticket_24dp);
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        final FirebaseAuth auth = FirebaseAuth.getInstance();
+        final FirebaseUser currentUser = auth.getCurrentUser();
+        if(currentUser != null)
+        {
+            DatabaseReference usersReference = db.getReference(DATABASE_USERS).child(currentUser.getUid());
+            usersReference.child(DATABASE_TOKEN).setValue(token);
+        }
 
-        Notification notification = builder.build();
-        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        manager.notify(NOTIFICATION_ID, notification);
     }
 }
