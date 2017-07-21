@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
 
         mFab.setOnClickListener(v ->
         {
-            if(mHasInternetAccess)
+            if(mHasInternetAccess && Connectivity.isConnected(this))
                 showAddUserDialog();
             else
                 Toast.makeText(this, "You need to have internet access to add a Steam account", Toast.LENGTH_SHORT).show();
@@ -235,7 +235,17 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
         }
         else if(notify)
         {
+            updateUser(steamUser);
             Toast.makeText(this, "This Steam account is already in the list", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void updateUser(SteamUser steamUser)
+    {
+        int updatedPosition = mSteamUsers.indexOf(steamUser);
+        if(updatedPosition != -1)
+        {
+            mAdapter.notifyItemChanged(updatedPosition);
         }
     }
 
@@ -253,6 +263,7 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void removeAccountFromDb(long steam64Id)
     {
         FirebaseDatabase db = Utils.getDatabase();
@@ -276,21 +287,20 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
                     DataSnapshot steamUsers = dataSnapshot.child(DATABASE_STEAM_ACCOUNTS);
                     for(DataSnapshot snapshot : steamUsers.getChildren())
                     {
-                        if(snapshot.getKey() != null)
+                        if(snapshot.getKey() != null && snapshot.getValue() != null)
                         {
+
+                            addUser(new SteamUser(
+                                    Long.parseLong(snapshot.getKey()),
+                                    (String) snapshot.getValue()
+                            ), false);
                             SteamUser.fromSteamId64(Long.parseLong(snapshot.getKey()), steamUser ->
                             {
                                 if(steamUser != null)
                                 {
-                                    addUser(steamUser, false);
+                                    updateUser(steamUser);
                                 }
-                                else if(snapshot.getValue() != null)
-                                {
-                                    addUser(new SteamUser(
-                                            Long.parseLong(snapshot.getKey()),
-                                            (String) snapshot.getValue()
-                                    ), false);
-                                }
+
                             });
                         }
                     }

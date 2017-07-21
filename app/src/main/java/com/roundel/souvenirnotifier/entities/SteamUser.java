@@ -248,11 +248,6 @@ public class SteamUser
         return steamId64;
     }
 
-    public void setSteamId64(long steamId64)
-    {
-        this.steamId64 = steamId64;
-    }
-
     public String getUsername()
     {
         return username;
