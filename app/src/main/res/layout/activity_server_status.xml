@@ -52,8 +52,8 @@
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:text="Start server"
         android:enabled="false"
+        android:text="Start server"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
@@ -70,4 +70,17 @@
         app:layout_constraintBottom_toTopOf="@+id/server_online"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
+
+    <TextView
+        android:id="@+id/server_rc_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginTop="16dp"
+        android:text="Note: server didnt enable remote control"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/server_running"/>
 </android.support.constraint.ConstraintLayout>

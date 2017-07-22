@@ -21,6 +21,7 @@ public class ServerStatusActivity extends AppCompatActivity
     @BindView(R.id.server_online) TextView mServerOnline;
     @BindView(R.id.server_running) TextView mServerRunning;
     @BindView(R.id.control_button) Button mControlButton;
+    @BindView(R.id.server_rc_status) TextView mServerRcStatus;
 
     private final View.OnClickListener mToggleServer = v -> toggleServerState();
 
@@ -47,10 +48,14 @@ public class ServerStatusActivity extends AppCompatActivity
                                     .child(MainActivity.DATABASE_SERVER_ONLINE).getValue();
                             Boolean running = (Boolean) dataSnapshot
                                     .child(MainActivity.DATABASE_SERVER_RUNNING).getValue();
+                            Boolean rcEnabled = (Boolean) dataSnapshot
+                                    .child(MainActivity.DATABASE_SERVER_RC_ENABLED).getValue();
+
+                            rcEnabled = rcEnabled != null ? rcEnabled : false;
 
                             if(online != null && running != null)
                             {
-                                updateUi(online, running);
+                                updateUi(online, running, rcEnabled);
                             }
                         }
                     }
@@ -63,11 +68,11 @@ public class ServerStatusActivity extends AppCompatActivity
                 });
     }
 
-    private void updateUi(boolean serverOnline, boolean serverRunning)
+    private void updateUi(boolean serverOnline, boolean serverRunning, boolean serverRc)
     {
         if(serverOnline)
         {
-            mControlButton.setEnabled(true);
+            mControlButton.setEnabled(serverRc);
             mServerOnline.setText("Online");
             mServerOnline.setTextColor(getColor(R.color.on));
         }
@@ -89,6 +94,7 @@ public class ServerStatusActivity extends AppCompatActivity
             mServerRunning.setText("Not running");
             mServerRunning.setTextColor(getColor(R.color.off));
         }
+        mServerRcStatus.setVisibility(!serverRc && serverOnline ? View.VISIBLE : View.GONE);
     }
 
     private void toggleServerState()

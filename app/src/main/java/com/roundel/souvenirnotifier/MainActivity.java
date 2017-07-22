@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
     public static final String DATABASE_SERVER_RUNNING = "server_running";
     public static final String DATABASE_SERVER_ONLINE = "server_online";
     public static final String DATABASE_SERVER_TRIGGER = "server_trigger";
+    public static final String DATABASE_SERVER_RC_ENABLED = "server_remote_control_enabled";
     public static final String DATABASE_USERS = DATABASE_DATA + "/users";
     public static final String DATABASE_TOKEN = "token";
     public static final String DATABASE_STEAM_ACCOUNTS = "steamAccounts";
