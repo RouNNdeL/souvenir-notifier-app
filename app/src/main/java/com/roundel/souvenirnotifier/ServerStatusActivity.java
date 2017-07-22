@@ -22,10 +22,7 @@ public class ServerStatusActivity extends AppCompatActivity
     @BindView(R.id.server_running) TextView mServerRunning;
     @BindView(R.id.control_button) Button mControlButton;
 
-    private final View.OnClickListener mToggleServer = v ->
-    {
-        toggleServerState();
-    };
+    private final View.OnClickListener mToggleServer = v -> toggleServerState();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

@@ -356,7 +356,10 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                mStartServerItem.setVisible(dataSnapshot != null);
+                if(mStartServerItem != null)
+                {
+                    mStartServerItem.setVisible(dataSnapshot != null);
+                }
             }
 
             @Override
