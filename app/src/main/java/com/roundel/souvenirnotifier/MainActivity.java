@@ -17,6 +17,8 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,9 +44,14 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
 {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    public static final String DATABASE_USERS = "users";
+    public static final String DATABASE_DATA = "data";
+    public static final String DATABASE_CONFIG = "config";
+    public static final String DATABASE_SERVER_RUNNING = "server_running";
+    public static final String DATABASE_SERVER_ONLINE = "server_online";
+    public static final String DATABASE_USERS = DATABASE_DATA + "/users";
     public static final String DATABASE_TOKEN = "token";
     public static final String DATABASE_STEAM_ACCOUNTS = "steamAccounts";
+
     private final ConnectivityChangeBroadcastReceiver mConnectivityBroadcastReceiver =
             new ConnectivityChangeBroadcastReceiver();
     @BindView(R.id.floatingActionButton) FloatingActionButton mFab;
@@ -55,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
     private List<SteamUser> mSteamUsers = new ArrayList<>();
     private String mToken;
     private boolean mHasInternetAccess;
+    private MenuItem mStartServerItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -106,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
         else
         {
             fetchDataFromDb();
+            updateMenuItem();
         }
     }
 
@@ -115,6 +124,28 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
         super.onResume();
 
         checkInternetAccess(true);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        mStartServerItem = menu.findItem(R.id.start_server_status);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch(item.getItemId())
+        {
+            case R.id.start_server_status:
+            {
+                Intent intent = new Intent(this, ServerStatusActivity.class);
+                startActivity(intent);
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -196,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
             {
                 Log.d(TAG, "signInAnonymously:success");
                 fetchDataFromDb();
+                updateMenuItem();
             }
             else
             {
@@ -306,6 +338,25 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
                     }
                     updateUi();
                 }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError)
+            {
+
+            }
+        });
+    }
+
+    private void updateMenuItem()
+    {
+        FirebaseDatabase database = Utils.getDatabase();
+        database.getReference(MainActivity.DATABASE_CONFIG).addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                mStartServerItem.setVisible(dataSnapshot != null);
             }
 
             @Override

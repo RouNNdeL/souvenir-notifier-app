@@ -32,6 +32,8 @@
             </intent-filter>
         </service>
 
+        <activity android:name=".ServerStatusActivity">
+        </activity>
     </application>
 
 </manifest>
