@@ -112,7 +112,7 @@ public class ServerStatusActivity extends AppCompatActivity
                                 if(online)
                                 {
                                     database.getReference(MainActivity.DATABASE_CONFIG)
-                                            .child(MainActivity.DATABASE_SERVER_RUNNING).setValue(!running);
+                                            .child(MainActivity.DATABASE_SERVER_TRIGGER).setValue(!running);
                                 }
                             }
                         }
