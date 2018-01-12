@@ -18,13 +18,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class MessagingService extends FirebaseMessagingService
-{
-     private static final String TAG = MessagingService.class.getSimpleName();
+public class MessagingService extends FirebaseMessagingService {
+    private static final String TAG = MessagingService.class.getSimpleName();
 
     @Override
-    public void onMessageReceived(RemoteMessage remoteMessage)
-    {
+    public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
         final Map<String, String> data = remoteMessage.getData();
@@ -45,8 +43,7 @@ public class MessagingService extends FirebaseMessagingService
         sendNotification(title, text, url);
     }
 
-    private void sendNotification(String title, String text, String itemUrl)
-    {
+    private void sendNotification(String title, String text, String itemUrl) {
         Intent showItemIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(itemUrl));
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, showItemIntent, 0);
 

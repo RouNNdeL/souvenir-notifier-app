@@ -40,8 +40,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements AddSteamUserDialogFragment.OnUserAddedListener, SteamUsersAdapter.OnItemLongClickListener
-{
+public class MainActivity extends AppCompatActivity implements AddSteamUserDialogFragment.OnUserAddedListener, SteamUsersAdapter.OnItemLongClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     public static final String DATABASE_DATA = "data";
@@ -56,8 +55,10 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
 
     private final ConnectivityChangeBroadcastReceiver mConnectivityBroadcastReceiver =
             new ConnectivityChangeBroadcastReceiver();
-    @BindView(R.id.floatingActionButton) FloatingActionButton mFab;
-    @BindView(R.id.recycler_view) RecyclerView mRecyclerView;
+    @BindView(R.id.floatingActionButton)
+    FloatingActionButton mFab;
+    @BindView(R.id.recycler_view)
+    RecyclerView mRecyclerView;
     private SteamUsersAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private FirebaseAuth mAuth;
@@ -67,8 +68,7 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
     private MenuItem mStartServerItem;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
 
         mFab.setOnClickListener(v ->
         {
-            if(mHasInternetAccess && Connectivity.isConnected(this))
+            if (mHasInternetAccess && Connectivity.isConnected(this))
                 showAddUserDialog();
             else
                 Toast.makeText(this, "You need to have internet access to add a Steam account", Toast.LENGTH_SHORT).show();
@@ -97,52 +97,42 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
     }
 
     @Override
-    protected void onDestroy()
-    {
+    protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mConnectivityBroadcastReceiver);
     }
 
     @Override
-    protected void onStart()
-    {
+    protected void onStart() {
         super.onStart();
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser == null)
-        {
+        if (currentUser == null) {
             signIn();
-        }
-        else
-        {
+        } else {
             fetchDataFromDb();
             updateMenuItem();
         }
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
 
         checkInternetAccess(true);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
+    public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         mStartServerItem = menu.findItem(R.id.start_server_status);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        switch(item.getItemId())
-        {
-            case R.id.start_server_status:
-            {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.start_server_status: {
                 Intent intent = new Intent(this, ServerStatusActivity.class);
                 startActivity(intent);
             }
@@ -151,16 +141,14 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
     }
 
     @Override
-    public boolean onUserAdded(SteamUser user, boolean inventoryAccessible)
-    {
+    public boolean onUserAdded(SteamUser user, boolean inventoryAccessible) {
         addUser(user, true);
-        if(!inventoryAccessible)
-        {
+        if (!inventoryAccessible) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setPositiveButton("Ok", (dialog, which) -> dialog.dismiss())
-                   .setTitle("Inventory error")
-                   .setMessage("We were unable to retrieve contents of you inventory. It's probably set to private, " +
-                           "change it's visibility to public or you might not receive the notifications for this account.");
+                    .setTitle("Inventory error")
+                    .setMessage("We were unable to retrieve contents of you inventory. It's probably set to private, " +
+                            "change it's visibility to public or you might not receive the notifications for this account.");
             builder.create().show();
         }
 
@@ -168,49 +156,41 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
     }
 
     @Override
-    public void onItemLongClick(int position)
-    {
+    public void onItemLongClick(int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Are you sure you want to remove this account from your list?")
-               .setTitle("Remove account")
-               .setPositiveButton("Remove", (dialog, which) ->
-               {
-                   dialog.dismiss();
-                   removeAccountFromDb(mSteamUsers.get(position).getSteamId64());
-                   mSteamUsers.remove(position);
-                   updateUi();
-               })
-               .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+                .setTitle("Remove account")
+                .setPositiveButton("Remove", (dialog, which) ->
+                {
+                    dialog.dismiss();
+                    removeAccountFromDb(mSteamUsers.get(position).getSteamId64());
+                    mSteamUsers.remove(position);
+                    updateUi();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         builder.create().show();
     }
 
-    private void checkInternetAccess()
-    {
+    private void checkInternetAccess() {
         checkInternetAccess(false);
     }
 
-    private void checkInternetAccess(boolean notify)
-    {
-        Connectivity.hasAccess(new Connectivity.onHasAccessResponse()
-        {
+    private void checkInternetAccess(boolean notify) {
+        Connectivity.hasAccess(new Connectivity.onHasAccessResponse() {
             @Override
-            public void onConnectionCheckStart()
-            {
+            public void onConnectionCheckStart() {
 
             }
 
             @Override
-            public void onConnectionAvailable(Long responseTime)
-            {
+            public void onConnectionAvailable(Long responseTime) {
                 mHasInternetAccess = true;
             }
 
             @Override
-            public void onConnectionUnavailable()
-            {
+            public void onConnectionUnavailable() {
                 mHasInternetAccess = false;
-                if(notify)
-                {
+                if (notify) {
                     Toast.makeText(
                             MainActivity.this,
                             "Internet is not available, your accounts may not appear",
@@ -221,31 +201,23 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
         });
     }
 
-    private void signIn()
-    {
+    private void signIn() {
         mAuth.signInAnonymously().addOnCompleteListener(this, task ->
         {
-            if(task.isSuccessful())
-            {
+            if (task.isSuccessful()) {
                 Log.d(TAG, "signInAnonymously:success");
                 fetchDataFromDb();
                 updateMenuItem();
-            }
-            else
-            {
+            } else {
                 Log.w(TAG, "signInAnonymously:failure", task.getException());
             }
         });
     }
 
-    private void showAddUserDialog()
-    {
-        //TODO: Show a custom dialog that will try to add a new Steam Account
-
+    private void showAddUserDialog() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         Fragment prev = getSupportFragmentManager().findFragmentByTag("dialog");
-        if(prev != null)
-        {
+        if (prev != null) {
             ft.remove(prev);
         }
         ft.addToBackStack(null);
@@ -255,74 +227,58 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
         newFragment.show(ft, "dialog");
     }
 
-    private void addUser(SteamUser steamUser, boolean notify)
-    {
-        if(steamUser == null)
-        {
+    private void addUser(SteamUser steamUser, boolean notify) {
+        if (steamUser == null) {
             throw new IllegalStateException("steamUser is null");
         }
-        if(!mSteamUsers.contains(steamUser))
-        {
+        if (!mSteamUsers.contains(steamUser)) {
             mSteamUsers.add(steamUser);
             saveData();
             updateUi();
-        }
-        else if(notify)
-        {
+        } else if (notify) {
             updateUser(steamUser);
             Toast.makeText(this, "This Steam account is already in the list", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void updateUser(SteamUser steamUser)
-    {
+    private void updateUser(SteamUser steamUser) {
         int updatedPosition = mSteamUsers.indexOf(steamUser);
-        if(updatedPosition != -1)
-        {
+        if (updatedPosition != -1) {
             mAdapter.notifyItemChanged(updatedPosition);
         }
     }
 
     @SuppressWarnings("ConstantConditions")
-    private void saveData()
-    {
+    private void saveData() {
         FirebaseDatabase db = Utils.getDatabase();
         DatabaseReference usersReference = db.getReference(DATABASE_USERS).child(mAuth.getCurrentUser().getUid());
         usersReference.child(DATABASE_TOKEN).setValue(mToken);
-        for(SteamUser account : mSteamUsers)
-        {
+        for (SteamUser account : mSteamUsers) {
             usersReference.child(DATABASE_STEAM_ACCOUNTS)
-                          .child(String.valueOf(account.getSteamId64()))
-                          .setValue(account.getUsername());
+                    .child(String.valueOf(account.getSteamId64()))
+                    .setValue(account.getUsername());
         }
     }
 
     @SuppressWarnings("ConstantConditions")
-    private void removeAccountFromDb(long steam64Id)
-    {
+    private void removeAccountFromDb(long steam64Id) {
         FirebaseDatabase db = Utils.getDatabase();
         DatabaseReference usersReference = db.getReference(DATABASE_USERS).child(mAuth.getCurrentUser().getUid());
         usersReference.child(DATABASE_STEAM_ACCOUNTS).child(String.valueOf(steam64Id)).removeValue();
     }
 
     @SuppressWarnings("ConstantConditions")
-    private void fetchDataFromDb()
-    {
+    private void fetchDataFromDb() {
         FirebaseDatabase db = Utils.getDatabase();
         DatabaseReference ref = db.getReference(DATABASE_USERS).child(mAuth.getCurrentUser().getUid());
         ref.keepSynced(true);
-        ref.addListenerForSingleValueEvent(new ValueEventListener()
-        {
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@Nullable DataSnapshot dataSnapshot)
-            {
-                if(dataSnapshot != null)
-                {
+            public void onDataChange(@Nullable DataSnapshot dataSnapshot) {
+                if (dataSnapshot != null) {
                     DataSnapshot steamUsers = dataSnapshot.child(DATABASE_STEAM_ACCOUNTS);
-                    for(DataSnapshot snapshot : steamUsers.getChildren())
-                    {
-                        if(snapshot.getKey() != null && snapshot.getValue() != null)
-                        {
+                    for (DataSnapshot snapshot : steamUsers.getChildren()) {
+                        if (snapshot.getKey() != null && snapshot.getValue() != null) {
 
                             addUser(new SteamUser(
                                     Long.parseLong(snapshot.getKey()),
@@ -330,8 +286,7 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
                             ), false);
                             SteamUser.fromSteamId64(Long.parseLong(snapshot.getKey()), steamUser ->
                             {
-                                if(steamUser != null)
-                                {
+                                if (steamUser != null) {
                                     updateUser(steamUser);
                                 }
 
@@ -343,46 +298,37 @@ public class MainActivity extends AppCompatActivity implements AddSteamUserDialo
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError)
-            {
+            public void onCancelled(DatabaseError databaseError) {
 
             }
         });
     }
 
-    private void updateMenuItem()
-    {
+    private void updateMenuItem() {
         FirebaseDatabase database = Utils.getDatabase();
-        database.getReference(MainActivity.DATABASE_CONFIG).addValueEventListener(new ValueEventListener()
-        {
+        database.getReference(MainActivity.DATABASE_CONFIG).addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                if(mStartServerItem != null)
-                {
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (mStartServerItem != null) {
                     mStartServerItem.setVisible(dataSnapshot != null);
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError)
-            {
-
+            public void onCancelled(DatabaseError databaseError) {
+                Log.v(TAG, databaseError.getMessage());
             }
         });
     }
 
-    private void updateUi()
-    {
+    private void updateUi() {
         Log.d(TAG, "Updating UI");
         mAdapter.swapData(mSteamUsers);
     }
 
-    class ConnectivityChangeBroadcastReceiver extends BroadcastReceiver
-    {
+    class ConnectivityChangeBroadcastReceiver extends BroadcastReceiver {
         @Override
-        public void onReceive(Context context, Intent intent)
-        {
+        public void onReceive(Context context, Intent intent) {
             Log.d(TAG, intent.getExtras().toString());
             checkInternetAccess();
         }

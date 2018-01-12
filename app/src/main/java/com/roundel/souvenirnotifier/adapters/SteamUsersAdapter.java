@@ -19,39 +19,33 @@ import com.roundel.souvenirnotifier.entities.SteamUser;
 
 import java.util.List;
 
-public class SteamUsersAdapter extends RecyclerView.Adapter<SteamUsersAdapter.ViewHolder>
-{
+public class SteamUsersAdapter extends RecyclerView.Adapter<SteamUsersAdapter.ViewHolder> {
     private List<SteamUser> mUsers;
     private Context mContext;
     private OnItemLongClickListener mOnItemLongClickListener;
     private RecyclerView mRecyclerView;
 
-    public SteamUsersAdapter(Context context, List<SteamUser> users)
-    {
+    public SteamUsersAdapter(Context context, List<SteamUser> users) {
         this.mContext = context;
         this.mUsers = users;
     }
 
-    public void swapData(List<SteamUser> users)
-    {
+    public void swapData(List<SteamUser> users) {
         this.mUsers = users;
         notifyDataSetChanged();
     }
 
-    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener)
-    {
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
         mOnItemLongClickListener = onItemLongClickListener;
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
-    {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ConstraintLayout content = (ConstraintLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_user, parent, false);
 
         content.setOnLongClickListener(v -> {
-            if(mOnItemLongClickListener != null)
-            {
+            if (mOnItemLongClickListener != null) {
                 mOnItemLongClickListener.onItemLongClick(mRecyclerView.getChildLayoutPosition(v));
             }
             return true;
@@ -66,8 +60,7 @@ public class SteamUsersAdapter extends RecyclerView.Adapter<SteamUsersAdapter.Vi
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position)
-    {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         SteamUser user = mUsers.get(position);
 
         TextView username = (TextView) holder.itemView.findViewById(R.id.list_text_primary);
@@ -78,36 +71,30 @@ public class SteamUsersAdapter extends RecyclerView.Adapter<SteamUsersAdapter.Vi
     }
 
     @Override
-    public int getItemCount()
-    {
+    public int getItemCount() {
         return mUsers.size();
     }
 
     @Override
-    public void onAttachedToRecyclerView(RecyclerView recyclerView)
-    {
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
         this.mRecyclerView = recyclerView;
     }
 
     @Override
-    public void onDetachedFromRecyclerView(RecyclerView recyclerView)
-    {
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
         this.mRecyclerView = null;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder
-    {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
-        ViewHolder(View itemView)
-        {
+        ViewHolder(View itemView) {
             super(itemView);
         }
     }
 
-    public interface OnItemLongClickListener
-    {
+    public interface OnItemLongClickListener {
         void onItemLongClick(int position);
     }
 }

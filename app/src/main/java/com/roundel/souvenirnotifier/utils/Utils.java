@@ -5,15 +5,12 @@ package com.roundel.souvenirnotifier.utils;
 
 import com.google.firebase.database.FirebaseDatabase;
 
-public class Utils
-{
+public class Utils {
     private static FirebaseDatabase mDatabase;
 
     //Credit https://stackoverflow.com/a/37551156/4061413
-    public static FirebaseDatabase getDatabase()
-    {
-        if(mDatabase == null)
-        {
+    public static FirebaseDatabase getDatabase() {
+        if (mDatabase == null) {
             mDatabase = FirebaseDatabase.getInstance();
             mDatabase.setPersistenceEnabled(true);
         }

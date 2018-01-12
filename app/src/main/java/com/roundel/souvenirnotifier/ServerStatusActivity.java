@@ -16,18 +16,20 @@ import com.roundel.souvenirnotifier.utils.Utils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ServerStatusActivity extends AppCompatActivity
-{
-    @BindView(R.id.server_online) TextView mServerOnline;
-    @BindView(R.id.server_running) TextView mServerRunning;
-    @BindView(R.id.control_button) Button mControlButton;
-    @BindView(R.id.server_rc_status) TextView mServerRcStatus;
+public class ServerStatusActivity extends AppCompatActivity {
+    @BindView(R.id.server_online)
+    TextView mServerOnline;
+    @BindView(R.id.server_running)
+    TextView mServerRunning;
+    @BindView(R.id.control_button)
+    Button mControlButton;
+    @BindView(R.id.server_rc_status)
+    TextView mServerRcStatus;
 
     private final View.OnClickListener mToggleServer = v -> toggleServerState();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_server_status);
 
@@ -37,13 +39,10 @@ public class ServerStatusActivity extends AppCompatActivity
 
         FirebaseDatabase database = Utils.getDatabase();
         database.getReference(MainActivity.DATABASE_CONFIG)
-                .addValueEventListener(new ValueEventListener()
-                {
+                .addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot)
-                    {
-                        if(dataSnapshot != null)
-                        {
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot != null) {
                             Boolean online = (Boolean) dataSnapshot
                                     .child(MainActivity.DATABASE_SERVER_ONLINE).getValue();
                             Boolean running = (Boolean) dataSnapshot
@@ -53,43 +52,34 @@ public class ServerStatusActivity extends AppCompatActivity
 
                             rcEnabled = rcEnabled != null ? rcEnabled : false;
 
-                            if(online != null && running != null)
-                            {
+                            if (online != null && running != null) {
                                 updateUi(online, running, rcEnabled);
                             }
                         }
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError)
-                    {
+                    public void onCancelled(DatabaseError databaseError) {
 
                     }
                 });
     }
 
-    private void updateUi(boolean serverOnline, boolean serverRunning, boolean serverRc)
-    {
-        if(serverOnline)
-        {
+    private void updateUi(boolean serverOnline, boolean serverRunning, boolean serverRc) {
+        if (serverOnline) {
             mControlButton.setEnabled(serverRc);
             mServerOnline.setText("Online");
             mServerOnline.setTextColor(getColor(R.color.on));
-        }
-        else
-        {
+        } else {
             mControlButton.setEnabled(false);
             mServerOnline.setText("Offline");
             mServerOnline.setTextColor(getColor(R.color.off));
         }
-        if(serverRunning)
-        {
+        if (serverRunning) {
             mControlButton.setText("Stop server");
             mServerRunning.setText("Running");
             mServerRunning.setTextColor(getColor(R.color.on));
-        }
-        else
-        {
+        } else {
             mControlButton.setText("Start server");
             mServerRunning.setText("Not running");
             mServerRunning.setTextColor(getColor(R.color.off));
@@ -97,26 +87,20 @@ public class ServerStatusActivity extends AppCompatActivity
         mServerRcStatus.setVisibility(!serverRc && serverOnline ? View.VISIBLE : View.GONE);
     }
 
-    private void toggleServerState()
-    {
+    private void toggleServerState() {
         final FirebaseDatabase database = Utils.getDatabase();
         database.getReference(MainActivity.DATABASE_CONFIG)
-                .addListenerForSingleValueEvent(new ValueEventListener()
-                {
+                .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot)
-                    {
-                        if(dataSnapshot != null)
-                        {
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot != null) {
                             Boolean online = (Boolean) dataSnapshot
                                     .child(MainActivity.DATABASE_SERVER_ONLINE).getValue();
                             Boolean running = (Boolean) dataSnapshot
                                     .child(MainActivity.DATABASE_SERVER_RUNNING).getValue();
 
-                            if(online != null && running != null)
-                            {
-                                if(online)
-                                {
+                            if (online != null && running != null) {
+                                if (online) {
                                     database.getReference(MainActivity.DATABASE_CONFIG)
                                             .child(MainActivity.DATABASE_SERVER_TRIGGER).setValue(!running);
                                 }
@@ -125,8 +109,7 @@ public class ServerStatusActivity extends AppCompatActivity
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError)
-                    {
+                    public void onCancelled(DatabaseError databaseError) {
 
                     }
                 });

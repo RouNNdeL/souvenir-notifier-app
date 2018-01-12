@@ -8,8 +8,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-public interface SteamCalls
-{
+public interface SteamCalls {
     String API_URL = "https://api.steampowered.com";
     String COMMUNITY_URL = "https://steamcommunity.com";
 

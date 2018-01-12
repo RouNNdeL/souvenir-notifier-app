@@ -24,27 +24,32 @@ import butterknife.ButterKnife;
  * Created by Krzysiek on 20/07/2017.
  */
 
-public class AddSteamUserDialogFragment extends DialogFragment
-{
-    @BindView(R.id.progress_bar) ProgressBar mProgressBar;
-    @BindView(R.id.text_input_layout) TextInputLayout mTextInputLayout;
-    @BindView(R.id.edit_text) TextInputEditText mTextInputEditText;
-    @BindView(R.id.button1) Button mPositiveButton;
-    @BindView(R.id.button2) Button mNegativeButton;
-    @BindView(R.id.button3) Button mNeutralButton;
-    @BindView(R.id.alertTitle) TextView mTitle;
-    @BindView(R.id.contentPanel) LinearLayout mContent;
+public class AddSteamUserDialogFragment extends DialogFragment {
+    @BindView(R.id.progress_bar)
+    ProgressBar mProgressBar;
+    @BindView(R.id.text_input_layout)
+    TextInputLayout mTextInputLayout;
+    @BindView(R.id.edit_text)
+    TextInputEditText mTextInputEditText;
+    @BindView(R.id.button1)
+    Button mPositiveButton;
+    @BindView(R.id.button2)
+    Button mNegativeButton;
+    @BindView(R.id.button3)
+    Button mNeutralButton;
+    @BindView(R.id.alertTitle)
+    TextView mTitle;
+    @BindView(R.id.contentPanel)
+    LinearLayout mContent;
 
     private OnUserAddedListener mListener;
 
-    public static AddSteamUserDialogFragment newInstance()
-    {
+    public static AddSteamUserDialogFragment newInstance() {
         return new AddSteamUserDialogFragment();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.add_steam_dialog, container, false);
 
         ButterKnife.bind(this, v);
@@ -56,8 +61,7 @@ public class AddSteamUserDialogFragment extends DialogFragment
 
         mNegativeButton.setOnClickListener(v1 ->
         {
-            if(getDialog() != null)
-            {
+            if (getDialog() != null) {
                 getDialog().dismiss();
             }
         });
@@ -67,34 +71,27 @@ public class AddSteamUserDialogFragment extends DialogFragment
     }
 
     @Override
-    public void onStart()
-    {
+    public void onStart() {
         super.onStart();
 
         Dialog dialog = getDialog();
-        if(dialog != null)
-        {
+        if (dialog != null) {
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
     }
 
     @Override
-    public void onAttach(Context context)
-    {
+    public void onAttach(Context context) {
         super.onAttach(context);
 
-        if(context instanceof OnUserAddedListener)
-        {
+        if (context instanceof OnUserAddedListener) {
             mListener = (OnUserAddedListener) context;
-        }
-        else
-        {
+        } else {
             throw new RuntimeException("Activity must implement OnUserAddedListener to use this DialogFragment");
         }
     }
 
-    private void checkUser()
-    {
+    private void checkUser() {
         String input = mTextInputEditText.getText().toString();
         TransitionManager.beginDelayedTransition(mContent);
         mProgressBar.setVisibility(View.VISIBLE);
@@ -103,29 +100,23 @@ public class AddSteamUserDialogFragment extends DialogFragment
         {
             TransitionManager.beginDelayedTransition(mContent);
             mProgressBar.setVisibility(View.GONE);
-            if(steamUser != null)
-            {
+            if (steamUser != null) {
                 steamUser.checkInventory(accessible ->
                 {
-                    if(mListener.onUserAdded(steamUser, accessible))
-                    {
-                        if(getDialog() != null)
-                        {
+                    if (mListener.onUserAdded(steamUser, accessible)) {
+                        if (getDialog() != null) {
                             getDialog().dismiss();
                         }
                     }
                 });
-            }
-            else
-            {
+            } else {
                 mTextInputLayout.setErrorEnabled(true);
                 mTextInputLayout.setError("Invalid Steam64ID, Custom ID or url");
             }
         });
     }
 
-    interface OnUserAddedListener
-    {
+    interface OnUserAddedListener {
         boolean onUserAdded(SteamUser user, boolean inventoryAccessible);
     }
 }
